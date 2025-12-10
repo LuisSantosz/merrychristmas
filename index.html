@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Edel White - Boas Festas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root {
+      --swiss-red: #f9423a;
+      --bg-deep: #050816;
+      --card-ice: #f5f8ff;      /* branco gelo */
+      --text-main: #0f172a;
+      --text-soft: #4b5563;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 20% -10%, #1e293b 0, transparent 40%),
+        radial-gradient(circle at 80% -10%, #0f172a 0, transparent 45%),
+        radial-gradient(circle at 50% 120%, #020617 0, #020617 60%, #000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto; /* permite rolar no celular */
+    }
+
+    /* Canvas de fogos */
+    #fireworksCanvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Fundo com estrelas */
+    .stars {
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 10% 15%, rgba(255, 255, 255, 0.3) 0, transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.25) 0, transparent 45%),
+        radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.18) 0, transparent 50%),
+        radial-gradient(circle at 60% 90%, rgba(255, 255, 255, 0.2) 0, transparent 55%);
+      opacity: 0.24;
+      mix-blend-mode: screen;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .scene-wrapper {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    /* ENVELOPE SUÍÇO */
+    .envelope-container {
+      position: relative;
+      width: 360px;
+      max-width: 90vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      perspective: 1200px;
+      transition: transform 0.7s ease, opacity 0.7s ease;
+    }
+
+    .envelope-container.opened {
+      transform: translateY(60px) scale(0.9);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .envelope {
+      position: relative;
+      width: 100%;
+      height: 230px;
+      border-radius: 24px;
+      background: linear-gradient(145deg, #ff6a5f, #d81620);
+      box-shadow:
+        0 30px 70px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      transform-style: preserve-3d;
+    }
+
+    .envelope::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% -40%, rgba(255, 255, 255, 0.9), transparent 60%),
+        radial-gradient(circle at 0% 100%, rgba(255, 255, 255, 0.25), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.25), transparent 55%);
+      opacity: 0.8;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .envelope-paper {
+      position: absolute;
+      left: 9%;
+      right: 9%;
+      bottom: 10%;
+      height: 54%;
+      background: #fdfdfd;
+      border-radius: 14px;
+      box-shadow:
+        0 14px 30px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(15, 23, 42, 0.05);
+    }
+
+    .envelope-base {
+      position: absolute;
+      inset: 45% 0 0 0;
+      background: linear-gradient(180deg, #f9423a, #d21b21);
+    }
+
+    .envelope-flap {
+      position: absolute;
+      inset: 0 0 40% 0;
+      background: var(--swiss-red);
+      clip-path: polygon(0 0, 50% 58%, 100% 0, 100% 100%, 0 100%);
+      transform-origin: top center;
+      transform: rotateX(0deg);
+      transition: transform 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+      box-shadow: 0 18px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    .envelope.opened .envelope-flap {
+      transform: rotateX(-160deg);
+      box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    }
+
+    .swiss-cross {
+      position: absolute;
+      top: 32%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 54px;
+      height: 54px;
+    }
+
+    .swiss-cross::before,
+    .swiss-cross::after {
+      content: "";
+      position: absolute;
+      background: #ffffff;
+      border-radius: 2px;
+    }
+
+    .swiss-cross::before {
+      width: 68%;
+      height: 22%;
+      top: 39%;
+      left: 16%;
+    }
+
+    .swiss-cross::after {
+      width: 22%;
+      height: 68%;
+      top: 16%;
+      left: 39%;
+    }
+
+    .envelope-button {
+      border: none;
+      outline: none;
+      padding: 11px 26px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: #ffffff;
+      color: var(--swiss-red);
+      box-shadow:
+        0 10px 22px rgba(0, 0, 0, 0.6),
+        0 0 24px rgba(255, 255, 255, 0.9);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition:
+        transform 0.12s ease-out,
+        box-shadow 0.12s ease-out,
+        filter 0.12s ease-out;
+    }
+
+    .envelope-button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+      box-shadow:
+        0 16px 30px rgba(0, 0, 0, 0.7),
+        0 0 28px rgba(255, 255, 255, 1);
+    }
+
+    .envelope-button:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow:
+        0 6px 14px rgba(0, 0, 0, 0.7),
+        0 0 16px rgba(255, 255, 255, 0.85);
+    }
+
+    /* CARD HORIZONTAL EM BRANCO GELO */
+    .card-wrapper {
+      position: absolute;
+      width: 100%;
+      max-width: 780px;
+      padding: 16px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) translateY(40px) scale(0.96);
+      opacity: 0;
+      pointer-events: none;
+      perspective: 1400px;
+      transition:
+        transform 0.7s cubic-bezier(0.19, 1, 0.22, 1),
+        opacity 0.7s ease;
+    }
+
+    .card-wrapper.visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) translateY(-4px) scale(1);
+      pointer-events: auto;
+    }
+
+    .card {
+      position: relative;
+      background: var(--card-ice);
+      border-radius: 26px;
+      padding: 26px 30px 22px 30px;
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(148, 163, 184, 0.4);
+      backdrop-filter: blur(22px);
+      transform-style: preserve-3d;
+      transform: rotateX(8deg) rotateY(-10deg) translateZ(0);
+      transition:
+        transform 0.18s ease-out,
+        box-shadow 0.18s ease-out;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr);
+      gap: 26px;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(255,255,255,0.9), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(255,255,255,0.6), transparent 60%);
+      z-index: -1;
+      opacity: 0.9;
+      mix-blend-mode: screen;
+    }
+
+    .card:hover {
+      box-shadow:
+        0 40px 95px rgba(0, 0, 0, 0.95),
+        0 0 0 1px rgba(107, 114, 128, 0.6);
+      transform: rotateX(6deg) rotateY(-4deg) translateZ(10px);
+    }
+
+    .card-left,
+    .card-right {
+      transform: translateZ(40px);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start; /* sem chip à direita */
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .pill {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--swiss-red);
+      background: rgba(249, 66, 58, 0.06);
+      padding: 6px 13px;
+      border-radius: 999px;
+      border: 1px solid rgba(249, 66, 58, 0.65);
+      font-weight: 700;
+    }
+
+    .card-title {
+      font-size: 24px;
+      line-height: 1.3;
+      font-weight: 800;
+      margin-bottom: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shine-text {
+      position: relative;
+      display: inline-block;
+      background: linear-gradient(
+        120deg,
+        #b91c1c,
+        #f97316,
+        #facc15,
+        #b91c1c
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .shine-text::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -120%;
+      width: 120%;
+      height: 100%;
+      background: linear-gradient(
+        120deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.7) 30%,
+        transparent 60%
+      );
+      transform: skewX(-18deg);
+      animation: shineMove 3.5s ease-in-out infinite;
+    }
+
+    @keyframes shineMove {
+      0%   { left: -130%; }
+      40%  { left: 130%; }
+      100% { left: 130%; }
+    }
+
+    .card-subtitle {
+      font-size: 14px;
+      color: var(--text-soft);
+      margin-bottom: 14px;
+    }
+
+    .card-message {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-main);
+    }
+
+    .card-message strong {
+      color: var(--swiss-red);
+      font-weight: 700;
+    }
+
+    .divider {
+      height: 1px;
+      margin: 18px 0 12px;
+      background: linear-gradient(
+        90deg,
+        rgba(148, 163, 184, 0),
+        rgba(148, 163, 184, 0.9),
+        rgba(148, 163, 184, 0)
+      );
+      opacity: 0.9;
+    }
+
+    .signature {
+      font-size: 13px;
+      color: var(--text-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-bottom: 10px;
+    }
+
+    .signature span:first-child {
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 11px;
+      color: var(--swiss-red);
+    }
+
+    .signature small {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    /* Slot para imagem "Feliz 2026" logo abaixo da assinatura */
+    .year-image-slot {
+      margin-top: 4px;
+      width: 100%;
+      border-radius: 16px;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .year-image-slot img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .card-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .brand-block {
+      align-self: flex-start;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: #ffffff;
+      border: 1px solid rgba(249, 66, 58, 0.3);
+      display: inline-flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.1);
+    }
+
+    .brand-name {
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--swiss-red);
+    }
+
+    .brand-tagline {
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    /* Painel da imagem de produtos – MAIOR */
+    .image-panel {
+      flex: 1;
+      margin-top: 6px;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      box-shadow:
+        0 20px 40px rgba(15, 23, 42, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.6);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e5edf9;
+      height: 360px; /* aumentei o espaço da imagem */
+    }
+
+    .image-panel img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .music-controls {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .music-button {
+      border: none;
+      outline: none;
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: radial-gradient(circle at top, #fee2e2 0, #fecaca 40%, #f97373 100%);
+      color: #7f1d1d;
+      box-shadow:
+        0 10px 18px rgba(0, 0, 0, 0.4),
+        0 0 16px rgba(252, 165, 165, 0.9);
+      transition:
+        transform 0.12s ease-out,
+        box-shadow 0.12s ease-out,
+        filter 0.12s ease-out;
+    }
+
+    .music-button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.04);
+      box-shadow:
+        0 16px 26px rgba(0, 0, 0, 0.5),
+        0 0 22px rgba(252, 165, 165, 1);
+    }
+
+    .music-button:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow:
+        0 6px 12px rgba(0, 0, 0, 0.5),
+        0 0 12px rgba(252, 165, 165, 0.7);
+    }
+
+    .music-status {
+      font-size: 12px;
+      color: #6b7280;
+      text-align: right;
+      flex: 1;
+      min-width: 130px;
+    }
+
+    .music-status span {
+      color: var(--swiss-red);
+      font-weight: 600;
+    }
+
+    /* RESPONSIVO TABLET / CELULAR */
+    @media (max-width: 900px) {
+      .card {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .card-right {
+        margin-top: 12px;
+      }
+      .image-panel {
+        height: 320px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .scene-wrapper {
+        align-items: flex-start;
+        padding: 20px 10px 32px;
+      }
+      .card-wrapper {
+        padding: 0;
+        top: 10px;
+        transform: translate(-50%, 0) translateY(20px) scale(0.98);
+      }
+      .card-wrapper.visible {
+        transform: translate(-50%, 0) translateY(0) scale(1);
+      }
+      .card {
+        padding: 20px 16px 18px;
+        border-radius: 22px;
+        transform: none;
+      }
+      .card:hover {
+        transform: none;
+      }
+      .card-title {
+        font-size: 20px;
+      }
+      .image-panel {
+        height: 280px;
+      }
+      .envelope-container {
+        margin-top: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="fireworksCanvas"></canvas>
+  <div class="stars"></div>
+
+  <div class="scene-wrapper">
+    <!-- ENVELOPE SUÍÇO -->
+    <div class="envelope-container" id="envelopeContainer">
+      <div class="envelope" id="envelope">
+        <div class="envelope-base"></div>
+        <div class="envelope-paper"></div>
+        <div class="envelope-flap">
+          <div class="swiss-cross"></div>
+        </div>
+      </div>
+      <button class="envelope-button" id="openButton">
+        ✉️ ABRIR
+      </button>
+    </div>
+
+    <!-- CARD HORIZONTAL -->
+    <div class="card-wrapper" id="cardWrapper">
+      <div class="card" id="card3D">
+        <div class="card-left">
+          <div class="card-header">
+            
+          </div>
+
+          <h1 class="card-title">
+            <span class="shine-text">
+              Um novo ano para sorrir com mais saúde, cuidado e longevidade.
+            </span>
+          </h1>
+
+          <p class="card-subtitle">
+            Da Suíça para o seu cotidiano, seguimos ao seu lado para que cada fase da vida venha acompanhada de um sorriso protegido.
+          </p>
+
+          <p class="card-message">
+            Em 2025, nossa missão continua a mesma: oferecer soluções que unem tecnologia suíça, suavidade no cuidado diário
+            e resultados reais para a <strong>saúde bucal</strong>.
+            <br><br>
+            Acreditamos que um sorriso bem cuidado é um investimento em <strong>longevidade, bem-estar e autoconfiança</strong>.
+            Por isso, cada detalhe da Edel White é pensado para cuidar de você hoje, amanhã e por muitos anos.
+            <br><br>
+            Agradecemos pela confiança em nossa marca e desejamos que o novo ano seja repleto de paz, saúde,
+            conquistas e muitos motivos para sorrir com quem você ama.
+          </p>
+
+          <div class="divider"></div>
+
+          <div class="signature">
+            <span>Edel white brasil</span>
+            <small>
+              Com carinho, nossa equipe deseja um ciclo novo iluminado, com sorrisos protegidos em cada capítulo da sua história.
+            </small>
+          </div>
+
+          <!-- Aqui entra a IMAGEM "Feliz 2026" -->
+          <div class="year-image-slot">
+            <img src="IMG/happy2026.png">
+            <!-- Exemplo:
+            
+            <img src="feliz-2026.png" alt="Feliz 2026">
+            -->
+          </div>
+        </div>
+
+        <div class="card-right">
+          <div class="brand-block">
+            <div class="brand-name">Edel white</div>
+            <div class="brand-tagline">
+              Cuidado suíço para a sua saúde bucal e a longevidade do seu sorriso.
+            </div>
+          </div>
+
+          <!-- Imagem de produtos (aumentada) -->
+          <div class="image-panel">
+            <!-- Troque pelo caminho da sua imagem de produtos -->
+            <img src="IMG/edel-produtos.jpg" alt="Produtos Edel White">
+          </div>
+
+          <div class="music-controls">
+            <button class="music-button" id="musicToggle">
+              🎵 Tocar música
+            </button>
+            <div class="music-status" id="musicStatus">
+              Música: <span>desligada</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sua música de fim de ano -->
+  <audio id="bgMusic" src="music/celebration.mp3" loop></audio>
+
+  <script>
+    // ABRIR ENVELOPE / MOSTRAR CARTA / FOGOS
+    (function () {
+      const envelope = document.getElementById("envelope");
+      const envelopeContainer = document.getElementById("envelopeContainer");
+      const openBtn = document.getElementById("openButton");
+      const cardWrapper = document.getElementById("cardWrapper");
+      let opened = false;
+
+      openBtn.addEventListener("click", () => {
+        if (opened) return;
+        opened = true;
+
+        envelope.classList.add("opened");
+
+        setTimeout(() => {
+          envelopeContainer.classList.add("opened");
+          cardWrapper.classList.add("visible");
+          if (window.startFireworks) window.startFireworks();
+        }, 700);
+      });
+    })();
+
+    // 3D HOVER DO CARD
+    (function () {
+      const card = document.getElementById("card3D");
+      const maxRotation = 14;
+
+      function handleMove(e) {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const percentX = (x / rect.width) - 0.5;
+        const percentY = (y / rect.height) - 0.5;
+
+        const rotateY = percentX * maxRotation;
+        const rotateX = -percentY * maxRotation;
+
+        card.style.transform = `
+          rotateX(${rotateX}deg)
+          rotateY(${rotateY}deg)
+          translateZ(10px)
+        `;
+      }
+
+      function resetTransform() {
+        card.style.transform = "rotateX(8deg) rotateY(-10deg) translateZ(0)";
+      }
+
+      card.addEventListener("mousemove", handleMove);
+      card.addEventListener("mouseleave", resetTransform);
+    })();
+
+    // MÚSICA PLAY/PAUSE
+    (function () {
+      const audio = document.getElementById("bgMusic");
+      const btn = document.getElementById("musicToggle");
+      const statusSpan = document.getElementById("musicStatus").querySelector("span");
+      let isPlaying = false;
+
+      btn.addEventListener("click", async () => {
+        try {
+          if (!isPlaying) {
+            await audio.play();
+            isPlaying = true;
+            btn.textContent = "⏸ Pausar música";
+            statusSpan.textContent = "tocando";
+          } else {
+            audio.pause();
+            isPlaying = false;
+            btn.textContent = "🎵 Tocar música";
+            statusSpan.textContent = "desligada";
+          }
+        } catch (err) {
+          console.error("Erro ao reproduzir áudio:", err);
+          statusSpan.textContent = "erro ao tocar";
+        }
+      });
+    })();
+
+    // FOGOS (só após abrir)
+    (function () {
+      const canvas = document.getElementById("fireworksCanvas");
+      const ctx = canvas.getContext("2d");
+
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+
+      window.addEventListener("resize", () => {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+      });
+
+      const fireworks = [];
+      const particles = [];
+      let fireworksEnabled = false;
+
+      class Firework {
+        constructor(x, y, targetY, color) {
+          this.x = x;
+          this.y = y;
+          this.targetY = targetY;
+          this.speed = (Math.random() * 4) + 6;
+          this.angle = -Math.PI / 2;
+          this.vx = Math.cos(this.angle) * this.speed;
+          this.vy = Math.sin(this.angle) * this.speed;
+          this.color = color;
+          this.trail = [];
+          this.done = false;
+        }
+
+        update() {
+          this.trail.push({ x: this.x, y: this.y });
+          if (this.trail.length > 10) this.trail.shift();
+
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vy += 0.07;
+
+          if (this.vy >= 0 || this.y <= this.targetY) {
+            this.explode();
+            this.done = true;
+          }
+        }
+
+        explode() {
+          const count = 48 + Math.floor(Math.random() * 28);
+          for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 * i) / count;
+            const speed = Math.random() * 3 + 2;
+            particles.push(new Particle(this.x, this.y, angle, speed, this.color));
+          }
+        }
+
+        draw() {
+          ctx.beginPath();
+          const last = this.trail[0];
+          ctx.moveTo(this.x, this.y);
+          if (last) ctx.lineTo(last.x, last.y);
+          ctx.strokeStyle = this.color;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+      }
+
+      class Particle {
+        constructor(x, y, angle, speed, color) {
+          this.x = x;
+          this.y = y;
+          this.vx = Math.cos(angle) * speed;
+          this.vy = Math.sin(angle) * speed;
+          this.friction = 0.97;
+          this.gravity = 0.08;
+          this.color = color;
+          this.opacity = 1;
+          this.decay = Math.random() * 0.015 + 0.007;
+          this.size = Math.random() * 1.8 + 0.7;
+        }
+
+        update() {
+          this.vx *= this.friction;
+          this.vy *= this.friction;
+          this.vy += this.gravity;
+          this.x += this.vx;
+          this.y += this.vy;
+          this.opacity -= this.decay;
+        }
+
+        draw() {
+          ctx.save();
+          ctx.globalAlpha = this.opacity;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      function randomColor() {
+        const colors = [
+          "#f97373",
+          "#fed7aa",
+          "#facc15",
+          "#bfdbfe",
+          "#fecaca",
+          "#bbf7d0"
+        ];
+        return colors[Math.floor(Math.random() * colors.length)];
+      }
+
+      let lastLaunch = 0;
+      const launchInterval = 700;
+
+      function animate(timestamp) {
+        requestAnimationFrame(animate);
+
+        ctx.globalCompositeOperation = "source-over";
+        ctx.clearRect(0, 0, width, height);
+
+        if (!fireworksEnabled) return;
+
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.fillStyle = "rgba(0,0,0,0.25)";
+        ctx.fillRect(0, 0, width, height);
+        ctx.globalCompositeOperation = "lighter";
+
+        if (!lastLaunch || timestamp - lastLaunch >= launchInterval) {
+          const startX = Math.random() * width * 0.8 + width * 0.1;
+          const targetY = Math.random() * height * 0.4 + height * 0.1;
+          fireworks.push(new Firework(startX, height + 10, targetY, randomColor()));
+          lastLaunch = timestamp;
+        }
+
+        for (let i = fireworks.length - 1; i >= 0; i--) {
+          fireworks[i].update();
+          fireworks[i].draw();
+          if (fireworks[i].done) fireworks.splice(i, 1);
+        }
+
+        for (let i = particles.length - 1; i >= 0; i--) {
+          particles[i].update();
+          particles[i].draw();
+          if (particles[i].opacity <= 0) particles.splice(i, 1);
+        }
+      }
+
+      requestAnimationFrame(animate);
+
+      window.startFireworks = function () {
+        fireworksEnabled = true;
+        lastLaunch = 0;
+      };
+    })();
+  </script>
+</body>
+</html>
