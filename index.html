@@ -581,6 +581,85 @@
     @media (prefers-reduced-motion: reduce) {
       * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
     }
+
+    /* =========================
+   RESPONSIVIDADE (mobile/tablet)
+   Tudo visível com rolagem natural
+   ========================= */
+
+/* 1) No celular/tablet: permitir rolagem dentro do overlay do card */
+@media (max-width: 900px) {
+  body {
+    overflow: auto; /* libera rolagem */
+  }
+
+  /* wrapper da cena pode crescer */
+  .scene-wrapper {
+    height: auto;
+    min-height: 100svh;
+    padding: 14px;
+  }
+
+  /* o overlay do card vira área rolável */
+  .card-wrapper {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 14px;
+    align-items: flex-start; /* começa no topo (melhor no mobile) */
+  }
+
+  /* card não corta mais */
+  .card {
+    width: 100%;
+    max-height: none;   /* remove limite */
+    height: auto;       /* deixa crescer */
+    overflow: visible;  /* não corta conteúdo */
+    padding: 18px;
+  }
+
+  .card-content {
+    height: auto;
+    min-height: 0;
+  }
+
+  /* 2) tira o scroll interno do texto no mobile (fica tudo visível) */
+  .card-message {
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+    margin-bottom: 14px;
+  }
+
+  /* 3) ajustes do topo e botões */
+  .music-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .music-status {
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* 4) logo responsivo */
+  .brand-logo {
+    width: 100%;
+    max-height: 220px; /* maior no mobile */
+  }
+
+  .close-hint {
+    position: static; /* não fica por cima no mobile */
+    margin-top: 10px;
+    justify-content: center;
+  }
+}
+
+/* Mobile pequeno */
+@media (max-width: 480px) {
+  .card-title { padding: 10px 0; }
+}
+
   </style>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -659,9 +738,7 @@
           <!-- ✅ Logo no FINAL com destaque -->
           <div class="brand-container" id="brandContainer">
             <img
-              class="brand-logo"
-              src="IMG/produto_6_png.png"
-              alt="Edel White Swiss"
+              class="brand-logo"src="IMG/produto_6_png.png"alt="Edel White Swiss"
               loading="eager"
               decoding="async"
             />
