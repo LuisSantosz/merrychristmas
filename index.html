@@ -509,6 +509,75 @@
         animation:none !important;
       }
     }
+
+/* ===========================
+   AJUSTE DEFINITIVO MOBILE
+   =========================== */
+@media (max-width: 480px){
+
+  /* Card cabe 100% na tela */
+  .card{
+    max-height: calc(100svh - 16px);
+    padding: 14px 14px;
+    border-radius: 22px;
+  }
+
+  /* Imagem 2026 menor */
+  .year-only{
+    width: 220px;
+    margin-bottom: 6px;
+  }
+
+  /* Título */
+  .card-title{
+    font-size: 18px;
+    margin: 6px 0 6px;
+  }
+
+  /* Subtítulo */
+  .card-subtitle{
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  /* Texto principal MAIS COMPACTO */
+  .card-message{
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  /* Linha divisória mais próxima */
+  .divider{
+    margin: 10px 0 8px;
+  }
+
+  /* Assinatura mais enxuta */
+  .signature{
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  /* Logo Edel White menor */
+  .brand-shine img{
+    height: 100px;
+    transform: scale(1.4);
+  }
+
+  /* Botão ocupa menos altura */
+  .music-button{
+    padding: 10px;
+    font-size: 11px;
+  }
+
+  /* Status centralizado */
+  .music-status{
+    font-size: 11px;
+    text-align: center;
+  }
+}
+
+
+
   </style>
 </head>
 
