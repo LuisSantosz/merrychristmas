@@ -214,7 +214,7 @@
         0 0 16px rgba(255, 255, 255, 0.85);
     }
 
-    /* CARD HORIZONTAL EM BRANCO GELO */
+    /* CARD HORIZONTAL */
     .card-wrapper {
       position: absolute;
       width: 100%;
@@ -283,23 +283,25 @@
     }
 
     .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 12px;
-      margin-bottom: 16px;
+      height: 0;
+      margin-bottom: 0;
     }
 
-    .pill {
-      font-size: 11px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--swiss-red);
-      background: rgba(249, 66, 58, 0.06);
-      padding: 6px 13px;
-      border-radius: 999px;
-      border: 1px solid rgba(249, 66, 58, 0.65);
-      font-weight: 700;
+    /* IMAGEM 2026 NO TOPO */
+    .year-image-slot {
+      margin: 4px 0 16px;
+      width: 100%;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .year-image-slot img {
+      width: 100%;
+      height: auto;
+      display: block;
     }
 
     .card-title {
@@ -379,7 +381,7 @@
     }
 
     .signature {
-      font-size: 13px;
+      font-size: 18px;
       color: var(--text-soft);
       display: flex;
       flex-direction: column;
@@ -391,31 +393,13 @@
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.18em;
-      font-size: 11px;
+      font-size: 18px;
       color: var(--swiss-red);
     }
 
     .signature small {
-      font-size: 12px;
+      font-size: 15px;
       color: #6b7280;
-    }
-
-    /* Slot para imagem "Feliz 2026" */
-    .year-image-slot {
-      margin-top: 4px;
-      width: 100%;
-      border-radius: 16px;
-      min-height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .year-image-slot img {
-      width: 100%;
-      height: auto;
-      display: block;
     }
 
     .card-right {
@@ -425,31 +409,7 @@
       gap: 14px;
     }
 
-    .brand-block {
-      align-self: flex-start;
-      padding: 10px 12px;
-      border-radius: 16px;
-      background: #ffffff;
-      border: 1px solid rgba(249, 66, 58, 0.3);
-      display: inline-flex;
-      flex-direction: column;
-      gap: 4px;
-      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.1);
-    }
-
-    .brand-name {
-      font-size: 14px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: var(--swiss-red);
-    }
-
-    .brand-tagline {
-      font-size: 12px;
-      color: var(--text-soft);
-    }
-
+    /* Painel da imagem de produtos */
     .image-panel {
       flex: 1;
       margin-top: 6px;
@@ -536,7 +496,7 @@
 
     /* ---------- RESPONSIVIDADE ---------- */
 
-    /* Tablet / telas médias: envelope em cima, card embaixo */
+    /* Tablet: envelope em cima, card embaixo */
     @media (max-width: 1024px) {
       .scene-wrapper {
         flex-direction: column;
@@ -634,6 +594,11 @@
         <div class="card-left">
           <div class="card-header"></div>
 
+          <!-- IMAGEM 2026 NO TOPO -->
+          <div class="year-image-slot">
+            <img src="IMG/happy2026.png" alt="Feliz 2026">
+          </div>
+
           <h1 class="card-title">
             <span class="shine-text">
               Um novo ano para sorrir com mais saúde, cuidado e longevidade.
@@ -663,21 +628,9 @@
               Com carinho, nossa equipe deseja um ciclo novo iluminado, com sorrisos protegidos em cada capítulo da sua história.
             </small>
           </div>
-
-          <!-- IMAGEM "Feliz 2026" -->
-          <div class="year-image-slot">
-            <img src="IMG/happy2026.png" alt="Feliz 2026">
-          </div>
         </div>
 
         <div class="card-right">
-          <div class="brand-block">
-            <div class="brand-name">Edel white</div>
-            <div class="brand-tagline">
-              Cuidado suíço para a sua saúde bucal e a longevidade do seu sorriso.
-            </div>
-          </div>
-
           <!-- Imagem de produtos -->
           <div class="image-panel">
             <img src="IMG/edel-produtos.jpg" alt="Produtos Edel White">
